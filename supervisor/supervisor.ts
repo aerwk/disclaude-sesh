@@ -45,11 +45,28 @@ const sysctl = (...args: string[]) => run(['systemctl', '--user', ...args]).then
 
 const tmuxAlive = () => Bun.spawnSync(['tmux', 'has-session', '-t', TMUX_SESSION]).exitCode === 0
 
-// Type a line into the session's composer. Literal mode + array args: nothing
-// is shell-interpreted, and the text must be a single line.
-async function tmuxType(line: string): Promise<void> {
-  await run(['tmux', 'send-keys', '-t', TMUX_SESSION, '-l', line.replace(/\s*\n\s*/g, ' ')])
-  await run(['tmux', 'send-keys', '-t', TMUX_SESSION, 'Enter'])
+const midTask = async () => /esc to interrupt/i.test((await capture()).join('\n'))
+
+// Type a line into the session's composer and make sure it actually submits.
+// The !command that triggered us also reaches the session via the channel
+// plugin (it spends a few seconds acknowledging/ignoring it) — if Enter lands
+// while that response is streaming, the keypress is swallowed and the text
+// sits in the composer unsent. So: wait for quiet, type, then verify the
+// composer cleared, re-sending Enter if it didn't.
+async function tmuxType(line: string): Promise<boolean> {
+  const text = line.replace(/\s*\n\s*/g, ' ')
+  for (let i = 0; i < 15 && (await midTask()); i++) await Bun.sleep(2000)
+  await run(['tmux', 'send-keys', '-t', TMUX_SESSION, '-l', text])
+  const probe = text.slice(0, 15)
+  for (let tries = 0; tries < 4; tries++) {
+    await run(['tmux', 'send-keys', '-t', TMUX_SESSION, 'Enter'])
+    await Bun.sleep(1500)
+    // the composer is the LAST ❯-prefixed line; once submitted it's empty
+    // (the transcript echo above also starts with ❯, hence "last")
+    const composer = (await capture()).filter(l => l.trimStart().startsWith('❯')).pop() ?? ''
+    if (!composer.includes(probe)) return true
+  }
+  return false
 }
 
 const tmuxKey = (key: string) => run(['tmux', 'send-keys', '-t', TMUX_SESSION, key])
@@ -65,16 +82,14 @@ async function capture(scrollback = 0): Promise<string[]> {
 }
 
 // If the terminal is showing a blocking dialog (trust prompt, permission
-// prompt, open modal) or is mid-response, injected keystrokes would land in
-// the wrong place — refuse and say why.
+// prompt, open modal), injected keystrokes would land in the wrong place —
+// refuse and say why. (Mid-response is NOT a blocker: tmuxType waits it out.)
 async function paneBlocked(): Promise<string | null> {
   const txt = (await capture()).join('\n')
   if (/Enter to confirm/i.test(txt) || /Do you want/i.test(txt) || /trust this folder/i.test(txt))
     return 'a dialog is open in the terminal (trust/permission prompt?) — it needs a human: `tmux attach -t ' + TMUX_SESSION + '`'
   if (/Esc to cancel/i.test(txt))
     return 'a modal panel is open in the terminal — close it first: `tmux attach -t ' + TMUX_SESSION + '`'
-  if (/esc to interrupt/i.test(txt))
-    return 'the session is mid-task right now — try again when it goes quiet'
   return null
 }
 
@@ -100,7 +115,7 @@ async function status(): Promise<string> {
   ]
   if (alive) {
     const blocked = await paneBlocked()
-    if (blocked && !/mid-task/.test(blocked)) rows.push(`⚠️ session is NOT taking messages: ${blocked}`)
+    if (blocked) rows.push(`⚠️ session is NOT taking messages: ${blocked}`)
     const sl = statusLine(await capture())
     if (sl) rows.push(`statusline: \`${sl}\``)
   }
@@ -130,7 +145,10 @@ const ensurePaneSize = () =>
 async function usage(msg: Message): Promise<void> {
   if (!(await requireComposer(msg))) return
   await ensurePaneSize()
-  await tmuxType('/usage')
+  if (!(await tmuxType('/usage'))) {
+    await msg.reply("⚠️ couldn't submit /usage to the session (terminal stayed busy) — try again")
+    return
+  }
   await Bun.sleep(4000)
   const lines = await capture()
   const keep = lines
@@ -148,7 +166,10 @@ async function usage(msg: Message): Promise<void> {
 async function context(msg: Message): Promise<void> {
   if (!(await requireComposer(msg))) return
   await ensurePaneSize()
-  await tmuxType('/context')
+  if (!(await tmuxType('/context'))) {
+    await msg.reply("⚠️ couldn't submit /context to the session (terminal stayed busy) — try again")
+    return
+  }
   await Bun.sleep(4000)
   const lines = await capture(400)
   let start = -1
@@ -179,7 +200,7 @@ function newestSave(): string | null {
 async function save(msg: Message, dir: string, label: string): Promise<void> {
   if (!(await requireComposer(msg))) return
   mkdirSync(dir, { recursive: true })
-  await tmuxType(
+  const ok = await tmuxType(
     `Run /save-session now, but write the session file into ${dir} (keep the usual ` +
     `YYYY-MM-DD-<short-id>-session.tmp naming; create the folder if needed). If the ` +
     `/save-session skill is not installed, write an equivalent comprehensive ` +
@@ -187,7 +208,9 @@ async function save(msg: Message, dir: string, label: string): Promise<void> {
     `Discord channel with id ${msg.channelId} via the discord reply tool, quoting ` +
     `the full file path.`,
   )
-  await msg.reply(`📝 asked the session to ${label} — it will confirm here with the file path when done`)
+  await msg.reply(ok
+    ? `📝 asked the session to ${label} — it will confirm here with the file path when done`
+    : "⚠️ couldn't submit the save instruction (terminal stayed busy) — try again")
 }
 
 async function resume(msg: Message): Promise<void> {
@@ -197,14 +220,16 @@ async function resume(msg: Message): Promise<void> {
     return
   }
   if (!(await requireComposer(msg))) return
-  await tmuxType(
+  const ok = await tmuxType(
     `Run /resume-session with the file ${file} — read it fully and load its state. ` +
     `If the /resume-session skill is not installed, read the file and continue ` +
     `exactly where it left off. Then confirm in the Discord channel with id ` +
     `${msg.channelId} via the discord reply tool, summarizing the loaded state and ` +
     `the next step.`,
   )
-  await msg.reply(`⏪ asked the session to resume \`${file.split('/').pop()}\` — briefing will arrive here (tip: \`!restart\` first for a clean context)`)
+  await msg.reply(ok
+    ? `⏪ asked the session to resume \`${file.split('/').pop()}\` — briefing will arrive here (tip: \`!restart\` first for a clean context)`
+    : "⚠️ couldn't submit the resume instruction (terminal stayed busy) — try again")
 }
 
 const HELP = [
