@@ -203,8 +203,15 @@ Tell me exactly which steps need my input before you start.
 | `!start` | Start the Claude Code session (systemd unit + tmux) |
 | `!stop` | Stop it — and it stays stopped until you say otherwise |
 | `!restart` | Fresh session, old context gone |
-| `!status` | Unit state + whether the tmux session is alive |
+| `!status` | Unit state, tmux liveness, the session statusline — and a ⚠️ if the terminal is wedged on a dialog |
+| `!usage` | Plan usage: current session % + reset time, weekly bars (read from the session's `/usage` panel) |
+| `!context` | Context window: tokens used, % free, category breakdown (read from `/context`) |
+| `!save` | Save the session's full state to the `disclaude` folder (`~/.claude/session-data/disclaude/` by default) |
+| `!resume` | Load the newest `!save` file into the session so the conversation continues — `!restart` first for a clean context |
+| `!handoff` | Save to the *default* session folder, so a terminal `/resume-session` picks it up as most recent |
 | `!help` | List the commands |
+
+**How the session commands work.** `!usage` and `!context` type the matching slash command into the session's tmux pane, read the rendered output back, and post a trimmed copy — if the terminal is showing a trust/permission dialog or is mid-task, they refuse and tell you why instead of typing into the wrong place. `!save`, `!resume`, and `!handoff` type a fixed instruction into the session asking it to write/read a session-state file and confirm in your ops channel; if you have `/save-session` + `/resume-session` skills installed the session uses them, otherwise it writes an equivalent state file. The supervisor never forwards your message text into the session — only these fixed strings and paths it computed itself.
 
 Commands go to the **supervisor bot**; everything else goes to the **channel plugin bot** — just talk to it in a DM, or in your ops channel (no @-mention needed once the channel is enabled in `access.json` with `requireMention: false`).
 

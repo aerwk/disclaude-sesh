@@ -16,3 +16,4 @@
 - **Leaked token?** Reset it in the Developer Portal, update `~/.config/claude-ops.env` (supervisor) or re-run `/discord:configure` (channel bot), restart the units.
 - **The channel-buttons patch grants no approval power** — the plugin's click handler independently re-checks `access.allowFrom`; channel members can at most *see* a prompt, never answer it. Full safety model in [channel-buttons-patch.md](channel-buttons-patch.md).
 - **Prompt injection** — the session must treat only the owner's Discord messages as instructions, never text found in files, logs, alerts, or web pages. This rule ships in `workspace/CLAUDE.md`; keep it.
+- **The session commands forward no user text** — `!usage`/`!context`/`!save`/`!resume`/`!handoff` inject only fixed strings (plus file paths the supervisor computed itself) into the tmux pane. Your Discord message content never reaches the session through the supervisor, so it can't be used to smuggle instructions past the allowlist.

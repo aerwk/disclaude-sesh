@@ -38,7 +38,9 @@ flowchart LR
 ## Features
 
 - **Chat from anywhere** — message a live Claude Code session on your server from Discord, DM or channel, via the official `discord@claude-plugins-official` channel plugin.
-- **Session control** — `!start` `!stop` `!restart` `!status` through a deliberately-dumb supervisor bot: four fixed verbs mapped to systemd, no shell passthrough by design.
+- **Session control** — `!start` `!stop` `!restart` `!status` through a deliberately-dumb supervisor bot: fixed verbs mapped to systemd, no shell passthrough by design.
+- **Session telemetry** — `!usage` (plan usage + reset time) and `!context` (context window breakdown) read straight from the running session's own panels.
+- **Save / resume over Discord** — `!save` snapshots the session's state, `!resume` continues from the latest snapshot, `!handoff` saves where your terminal's `/resume-session` will find it.
 - **Approvals on your phone** — tool permission prompts arrive as Allow/Deny buttons in Discord.
 - **Channel buttons (optional)** — a small patch moves approval buttons from DMs into your ops channel, and an auto-repatcher re-applies it after every plugin update — or alerts you in Discord when upstream changed too much to patch safely.
 - **Unattended resilience** — systemd user units + linger survive reboots, tmux survives disconnects, a restart loop survives crashes.
