@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="disclaude-sesh logo">
+  <!-- speech bubble -->
+  <rect x="32" y="64" width="448" height="320" rx="72" fill="#5865F2"/>
+  <path d="M132 372 L132 460 L228 376 Z" fill="#5865F2"/>
+  <!-- terminal prompt >_ -->
+  <g stroke="#ffffff" stroke-width="38" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M156 152 L244 224 L156 296"/>
+    <path d="M292 296 L376 296"/>
+  </g>
+</svg>

@@ -1,5 +1,7 @@
 # Channel permission buttons (optional patch)
 
+**Quick links:** [Enabling it](#enabling-it) · [Disabling it](#disabling-it) · [← back to README](../README.md)
+
 ## The problem
 
 When the Claude Code session wants to run a tool that needs approval, the
