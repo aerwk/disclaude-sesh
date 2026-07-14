@@ -6,10 +6,9 @@
 
 **Drive Claude Code on your home server from Discord on your phone.**
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-5865F2)](LICENSE)
-[![Discord](https://img.shields.io/badge/Discord-two--bot%20bridge-5865F2?logo=discord&logoColor=white)](https://discord.com/developers/applications)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-channels-5865F2?logo=claude&logoColor=white)](https://code.claude.com/docs/en/channels)
-[![Runtime: Bun](https://img.shields.io/badge/runtime-Bun-5865F2?logo=bun&logoColor=white)](https://bun.sh)
+[![Stars](https://img.shields.io/github/stars/aerwk/disclaude-sesh?label=Stars&color=5865F2&logo=github&logoColor=white)](https://github.com/aerwk/disclaude-sesh/stargazers)
+[![Release](https://img.shields.io/github/v/release/aerwk/disclaude-sesh?label=Release&color=5865F2&logo=github&logoColor=white)](https://github.com/aerwk/disclaude-sesh/releases/latest)
+[![Discord](https://img.shields.io/discord/1296063884985368657?label=Discord&color=5865F2&logo=discord&logoColor=white)](https://discord.gg/R9nVksxWvm)
 
 [**Installation 💻**](docs/installation.md) • [**Security 🔐**](docs/security.md) • [**Troubleshooting 🛠️**](docs/troubleshooting.md) • [**License 📄**](LICENSE)
 
