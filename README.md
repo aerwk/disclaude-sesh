@@ -1,4 +1,4 @@
-# discord-claude-ops
+# disclaude-sesh
 
 Drive Claude Code on your home server from Discord on your phone. Start, stop, and restart sessions with bot commands, chat with a live session from anywhere, and approve tool use with Allow/Deny buttons — all through two small Discord bots. The whole thing survives reboots, crashes, and dropped SSH connections, and opens **zero inbound ports**: both bots are outbound gateway clients.
 
@@ -100,7 +100,7 @@ tmux -V
 bun --version
 
 # clone and install the supervisor's one dependency (discord.js)
-git clone https://github.com/aerwk/discord-claude-ops.git ~/claude-ops
+git clone https://github.com/aerwk/disclaude-sesh.git ~/claude-ops
 cd ~/claude-ops/supervisor
 bun install
 ```
@@ -220,9 +220,9 @@ If you already run Claude Code on the server, let it install this for you. You o
 **Step 2 — hand the rest to Claude Code.** On the server, run `claude` and paste:
 
 ```text
-Set up discord-claude-ops (https://github.com/aerwk/discord-claude-ops) on this machine:
+Set up disclaude-sesh (https://github.com/aerwk/disclaude-sesh) on this machine:
 
-1. Clone https://github.com/aerwk/discord-claude-ops to ~/claude-ops (the
+1. Clone https://github.com/aerwk/disclaude-sesh to ~/claude-ops (the
    systemd units expect exactly that path).
 2. Install Bun if missing, then run `bun install` in ~/claude-ops/supervisor.
 3. Create ~/.config/claude-ops.env from examples/claude-ops.env.example with
