@@ -14,7 +14,9 @@
 
 </div>
 
-Start, stop, and restart Claude Code sessions with bot commands, chat with a live session from anywhere, and approve tool use with Allow/Deny buttons — all through two small Discord bots. The whole thing survives reboots, crashes, and dropped SSH connections, and opens **zero inbound ports**: both bots are outbound gateway clients.
+Claude Code's remote surfaces — Remote Control, the mobile app, channel plugins — all share one rule: they can only attach to a session that's **already running**. That's fine on a laptop. But if the CLI lives on an always-on server, with your workspace there and every other machine just a window into it, that rule becomes the lockout: forget to start a session before you leave, let one crash or hit the ~10-minute network timeout, or reboot the box — and Claude Code is unreachable until you can SSH back in. There is no native way to *start* a session remotely on a headless server.
+
+**disclaude-sesh is the missing start button.** A deliberately-dumb supervisor bot turns sessions on and off through systemd (`!start` `!stop` `!restart` `!status`), the official Discord channel plugin carries the conversation and the Allow/Deny permission buttons, and systemd + tmux keep it all alive across reboots, crashes, and dropped connections — with **zero inbound ports**, since both bots are outbound clients.
 
 ```mermaid
 flowchart LR
