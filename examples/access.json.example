@@ -1,0 +1,12 @@
+{
+  "_comment": "Shape of ~/.claude/channels/discord/access.json AFTER setup. The plugin creates and manages this file — pairing fills allowFrom, `/discord:access policy allowlist` sets dmPolicy, and the groups entry enables your ops channel. Edit by hand only if you know why. IDs below are placeholders.",
+  "dmPolicy": "allowlist",
+  "allowFrom": ["YOUR_DISCORD_USER_ID"],
+  "groups": {
+    "YOUR_OPS_CHANNEL_ID": {
+      "requireMention": false,
+      "allowFrom": ["YOUR_DISCORD_USER_ID"]
+    }
+  },
+  "pending": {}
+}

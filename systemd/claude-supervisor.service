@@ -1,0 +1,11 @@
+[Unit]
+Description=Discord supervisor bot for claude-ops (!start/!stop/!restart/!status)
+
+[Service]
+EnvironmentFile=%h/.config/claude-ops.env
+ExecStart=%h/.bun/bin/bun run %h/claude-ops/supervisor/supervisor.ts
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target

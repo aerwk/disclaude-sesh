@@ -1,0 +1,11 @@
+[Unit]
+Description=Claude Code ops session (Discord channel) in tmux
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/tmux new-session -d -s claudeops %h/claude-ops/bin/claude-ops.sh
+ExecStop=/usr/bin/tmux kill-session -t claudeops
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
